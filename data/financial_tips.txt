@@ -1,0 +1,146 @@
+========================
+BUDGETING CORE RULES
+========================
+
+- Follow the 50/30/20 rule:
+  50% needs (rent, food, bills),
+  30% wants (entertainment, shopping),
+  20% savings/investments.
+
+- Always prioritize saving before spending (Pay Yourself First principle).
+
+- Emergency fund should cover 3–6 months of essential expenses.
+
+- Never invest money if emergency fund is not established.
+
+- Fixed expenses (rent, EMI, subscriptions) should not exceed 50–60% of income.
+
+- Track all expenses daily or weekly to avoid hidden leakage.
+
+
+========================
+SPENDING BEHAVIOR INSIGHTS
+========================
+
+- Food delivery and online shopping are the most common sources of impulse spending.
+
+- Weekend spending is typically 20–40% higher than weekday spending.
+
+- Small repeated purchases (like snacks, subscriptions) create major monthly leakage.
+
+- Emotional states like stress, boredom, or celebration increase unnecessary spending.
+
+- Subscription services often go unnoticed and accumulate over time.
+
+- People tend to underestimate their “small daily expenses” significantly.
+
+
+========================
+SAVINGS & FINANCIAL DISCIPLINE
+========================
+
+- Savings should be automated whenever possible.
+
+- Increase savings rate whenever income increases (avoid lifestyle inflation).
+
+- Maintain at least 20% savings rate minimum for financial stability.
+
+- Build short-term, medium-term, and long-term savings buckets.
+
+- Short-term savings = 0–1 year goals (gadgets, trips)
+
+- Medium-term savings = 1–5 years (car, education)
+
+- Long-term savings = 5+ years (wealth building, retirement)
+
+
+========================
+INVESTMENT RULES
+========================
+
+- Younger users (18–25) can take higher equity exposure due to long time horizon.
+
+- Risk-averse users should prefer debt instruments or balanced funds.
+
+- Diversification reduces investment risk significantly.
+
+- Do not invest in high-risk assets without financial stability.
+
+- Start with simple instruments like index funds before advanced trading.
+
+- Avoid emotional investing based on market hype.
+
+
+========================
+RISK MANAGEMENT RULES
+========================
+
+- Always maintain liquidity for emergencies.
+
+- Avoid over-dependence on credit cards for lifestyle expenses.
+
+- High debt-to-income ratio increases financial stress and instability.
+
+- If debt exists, prioritize repayment before aggressive investing.
+
+- Financial safety comes before wealth growth.
+
+
+========================
+BEHAVIORAL FINANCE RULES
+========================
+
+- Humans are loss-averse and react more strongly to losses than gains.
+
+- People tend to overspend when rewards or cashback are involved.
+
+- Financial decisions are often emotionally influenced, not logical.
+
+- Framing effect influences how users perceive expenses and savings.
+
+- Commitment systems (like fixed savings transfers) improve discipline.
+
+
+========================
+FINANCIAL ADVICE FORMAT RULES
+========================
+
+When generating advice, always structure output as:
+
+1. Insights:
+   Explain user spending patterns clearly.
+
+2. Risks:
+   Highlight financial risks or unhealthy behavior.
+
+3. Action Plan:
+   Provide simple, step-by-step improvements.
+
+Keep language simple, practical, and non-technical.
+
+Avoid jargon unless necessary.
+
+Prioritize clarity over complexity.
+
+
+========================
+PERSONALIZATION RULES
+========================
+
+- If user is young (18–25): focus on habit building and long-term investing.
+
+- If user has low savings: prioritize budgeting and expense control.
+
+- If user has high income: focus on optimization and investment strategy.
+
+- If user is risk-averse: suggest safe and stable instruments.
+
+- If user overspends in a category: suggest category-specific reduction strategies.
+
+
+========================
+FINAL PRINCIPLE
+========================
+
+The goal of financial advice is not just wealth creation,
+but building long-term financial stability, discipline, and awareness.

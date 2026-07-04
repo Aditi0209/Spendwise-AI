@@ -1,0 +1,12 @@
+groq 
+fastapi 
+uvicorn 
+python-dotenv 
+pydantic
+chromadb
+pymongo
+langgraph
+langchain
+httpx 
+loguru
+langfuse

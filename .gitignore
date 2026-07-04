@@ -1,0 +1,103 @@
+# ==========================
+# Virtual Environment
+# ==========================
+venv/
+.venv/
+env/
+ENV/
+
+# ==========================
+# Environment Variables
+# ==========================
+.env
+.env.*
+!.env.example
+
+# ==========================
+# Python Cache
+# ==========================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ==========================
+# Distribution / Packaging
+# ==========================
+build/
+dist/
+*.egg-info/
+.eggs/
+*.whl
+
+# ==========================
+# Logs
+# ==========================
+*.log
+
+# ==========================
+# Unit Test / Coverage
+# ==========================
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# ==========================
+# Type Checkers
+# ==========================
+.mypy_cache/
+.pyre/
+.pytype/
+
+# ==========================
+# Jupyter Notebook
+# ==========================
+.ipynb_checkpoints/
+
+# ==========================
+# IDEs
+# ==========================
+.vscode/
+.idea/
+*.iml
+
+# ==========================
+# OS Files
+# ==========================
+.DS_Store
+Thumbs.db
+
+# ==========================
+# SQLite Databases
+# ==========================
+*.sqlite3
+*.db
+
+# ==========================
+# Temporary Files
+# ==========================
+*.tmp
+*.temp
+.cache/
+
+# ==========================
+# Secrets / Credentials
+# ==========================
+*.pem
+*.key
+*.crt
+secrets.json
+credentials.json
+
+# ==========================
+# Miscellaneous
+# ==========================
+*.bak
+*.swp
+
+# ChromaDB
+chroma/
+chroma_db/
+persist/
