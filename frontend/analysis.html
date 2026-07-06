@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SpendWise AI | Analysis</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+
+  <body>
+    <div class="d-flex">
+      <aside class="sidebar">
+        <div>
+          <h3 class="logo">
+            <i class="bi bi-wallet2"></i>
+            SpendWise AI
+          </h3>
+
+          <nav class="nav flex-column mt-5">
+            <a href="index.html" class="nav-link">
+              <i class="bi bi-house-door-fill"></i>
+              Dashboard
+            </a>
+            <a href="analysis.html" class="nav-link active">
+              <i class="bi bi-bar-chart-line-fill"></i>
+              Analysis
+            </a>
+            <a href="history.html" class="nav-link">
+              <i class="bi bi-clock-history"></i>
+              History
+            </a>
+            <a href="workflow.html" class="nav-link">
+              <i class="bi bi-diagram-3-fill"></i>
+              Workflow
+            </a>
+          </nav>
+        </div>
+
+        <div class="sidebar-footer">
+          <p>AI Financial Orchestration</p>
+          <!-- <p id="userLabel" class="user-email"></p>
+          <a href="#" id="logoutBtn" class="nav-link logout-link">
+            <i class="bi bi-box-arrow-right"></i>
+            Sign Out
+          </a> -->
+          <small>Version 1.0</small>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <div class="topbar">
+          <div>
+            <h4>AI Financial Analysis</h4>
+            <small class="text-muted">
+              Analyze transactions and receive personalized financial advice.
+            </small>
+          </div>
+          <div class="profile-circle" id="profileAvatar">A</div>
+        </div>
+
+        <!-- Profile -->
+        <div class="card shadow-sm border-0">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h3 class="fw-bold mb-0">User Profile</h3>
+              <span class="badge bg-primary">Step 1</span>
+            </div>
+
+            <form id="profileForm">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Name</label>
+                  <input type="text" id="name" class="form-control" placeholder="Enter your name" />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Age</label>
+                  <input type="number" id="age" class="form-control" placeholder="Age" />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Monthly Income (₹)</label>
+                  <input type="number" id="income" class="form-control" placeholder="50000" />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Monthly Spend (₹)</label>
+                  <input type="number" id="monthlySpend" class="form-control" value="0" min="0" readonly />
+                  <small class="text-muted">Calculated from your transactions</small>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Risk Appetite</label>
+                  <select id="risk" class="form-select">
+                    <option>Low</option>
+                    <option selected>Medium</option>
+                    <option>High</option>
+                  </select>
+                </div>
+                <div class="col-12 mb-4">
+                  <label class="form-label">Financial Goal</label>
+                  <input
+                    type="text"
+                    id="goal"
+                    class="form-control"
+                    placeholder="Wealth Creation / House / Retirement"
+                  />
+                </div>
+              </div>
+
+              <button class="btn btn-primary px-4" type="submit">
+                <i class="bi bi-check-circle me-2"></i>
+                Save Profile
+              </button>
+              <div id="profileStatus" class="mt-3"></div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Transaction Input -->
+        <div class="card shadow-sm border-0 mt-4">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h3 class="fw-bold mb-0">Transaction Analysis</h3>
+              <span class="badge bg-success">Step 2</span>
+            </div>
+
+            <p class="text-muted">
+              Paste your bank statement, SMS transactions, or expense summary.
+            </p>
+
+            <textarea
+              id="transactionText"
+              class="form-control"
+              rows="8"
+              placeholder="Example:
+
+Paid ₹350 on Zomato
+Uber ₹420
+Electricity Bill ₹2500
+Amazon ₹1800"
+            ></textarea>
+
+            <button id="analyzeBtn" class="btn btn-success mt-4">
+              <i class="bi bi-cpu me-2"></i>
+              Analyze Financial Data
+            </button>
+          </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loadingSection" class="text-center py-5" style="display: none">
+          <div class="spinner-border text-primary" role="status"></div>
+          <p class="mt-3 text-muted">Running LangGraph pipeline…</p>
+        </div>
+
+        <!-- Results -->
+        <div id="analysisResults" class="mt-4" style="display: none">
+          <h3 class="section-title mb-4">Analysis Results</h3>
+
+          <div class="row g-4">
+            <div class="col-lg-6">
+              <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                  <h5 class="fw-bold">
+                    <i class="bi bi-receipt text-primary me-2"></i>
+                    Parsed Transactions
+                  </h5>
+                  <div id="parsedOutput" class="result-content"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-6">
+              <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                  <h5 class="fw-bold">
+                    <i class="bi bi-pie-chart text-warning me-2"></i>
+                    Spending Breakdown
+                  </h5>
+                  <div id="breakdownOutput" class="result-content"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-6">
+              <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                  <h5 class="fw-bold">
+                    <i class="bi bi-wallet2 text-success me-2"></i>
+                    Asset Allocation
+                  </h5>
+                  <div id="allocationOutput" class="result-content"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-6">
+              <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                  <h5 class="fw-bold">
+                    <i class="bi bi-book text-info me-2"></i>
+                    Financial Knowledge (RAG)
+                  </h5>
+                  <div id="ragOutput" class="result-content"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="card shadow-sm border-primary advice-card">
+                <div class="card-body">
+                  <h5 class="fw-bold">
+                    <i class="bi bi-stars text-primary me-2"></i>
+                    AI Advisor Output
+                  </h5>
+                  <div id="adviceOutput" class="advice-text"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- <script src="js/auth.js"></script>
+    <script>
+      if (requireAuth()) initUserNav();
+    </script> -->
+    <script src="js/analysis.js"></script>
+  </body>
+</html>

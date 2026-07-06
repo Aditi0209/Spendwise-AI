@@ -11,11 +11,27 @@ from langfuse import get_client
 from groq import Groq
 import os
 from dotenv import load_dotenv
+import logging
 
 load_dotenv()
 
-langfuse = get_client()
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+logger = logging.getLogger("spendwise.langgraph")
+
+# Initialize clients only if API keys exist; otherwise leave None and handle later
+_GROQ_KEY = os.getenv("GROQ_API_KEY")
+_LANGFUSE_KEY = os.getenv("LANGFUSE_API_KEY")
+
+try:
+    langfuse = get_client() if _LANGFUSE_KEY else None
+except Exception as e:
+    logger.warning(f"Langfuse client init failed: {e}")
+    langfuse = None
+
+try:
+    client = Groq(api_key=_GROQ_KEY) if _GROQ_KEY else None
+except Exception as e:
+    logger.warning(f"Groq client init failed: {e}")
+    client = None
 
 # -------------------------
 # NODE 1: PARSE
@@ -126,43 +142,57 @@ Context: {context}
 Give insights, risks, savings plan.
 """
 
-    # ✅ LANGFUSE TRACE
-    with langfuse.start_as_current_observation(
-        as_type="span",
-        name="financial-advisor"
-    ) as span:
+    output = None
 
-        span.update(input={
-            "profile": profile,
-            "history": history,
-            "breakdown": breakdown
-        })
+    # If LLM client is not configured, return a safe fallback message
+    if client is None:
+        logger.warning("Groq client not configured; returning fallback advice.")
+        output = (
+            "LLM not configured. Fallback advice: follow basic budgeting rules, build an emergency fund, "
+            "and track discretionary spending."
+        )
+        return {"final_advice": output}
 
-        # ✅ LLM GENERATION
-        with langfuse.start_as_current_observation(
-            as_type="generation",
-            name="llm-advisor",
-            model="llama-3.3-70b-versatile"
-        ) as generation:
+    # Attempt to trace and generate via Langfuse + Groq; handle failures gracefully
+    try:
+        if langfuse:
+            with langfuse.start_as_current_observation(
+                as_type="span",
+                name="financial-advisor"
+            ) as span:
+                span.update(input={"profile": profile, "history": history, "breakdown": breakdown})
 
+                with langfuse.start_as_current_observation(
+                    as_type="generation",
+                    name="llm-advisor",
+                    model="llama-3.3-70b-versatile"
+                ) as generation:
+                    response = client.chat.completions.create(
+                        model="llama-3.3-70b-versatile",
+                        messages=[{"role": "user", "content": prompt}],
+                        temperature=0.3,
+                    )
+                    output = response.choices[0].message.content
+                    generation.update(input=prompt, output=output)
+
+                span.update(output={"final_advice": output})
+        else:
+            # No langfuse, but Groq client exists — still attempt LLM call
             response = client.chat.completions.create(
                 model="llama-3.3-70b-versatile",
                 messages=[{"role": "user", "content": prompt}],
-                temperature=0.3
+                temperature=0.3,
             )
-
             output = response.choices[0].message.content
 
-            generation.update(
-                input=prompt,
-                output=output
-            )
+    except Exception as e:
+        logger.error(f"LLM/langfuse error in advisor_node: {e}")
+        output = (
+            "LLM error occurred. Fallback advice: follow basic budgeting rules, build an emergency fund, "
+            "and track discretionary spending."
+        )
 
-        span.update(output={"final_advice": output})
-
-    return {
-        "final_advice": output
-    }
+    return {"final_advice": output}
 
 
 # -------------------------
@@ -209,6 +239,6 @@ app = graph.compile()
 def run_graph(text: str):
 
     result = app.invoke({
-        "text": text
+        "text": text,
     })
     return result

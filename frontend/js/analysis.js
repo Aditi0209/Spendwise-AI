@@ -1,0 +1,195 @@
+const API_BASE = window.location.origin || "http://127.0.0.1:8000";
+
+function formatCurrency(amount) {
+  return `₹${Number(amount).toLocaleString("en-IN")}`;
+}
+
+function showStatus(el, message, type) {
+  el.className = `mt-3 alert alert-${type}`;
+  el.textContent = message;
+}
+
+function renderTransactions(transactions) {
+  if (!transactions || transactions.length === 0) {
+    return '<p class="text-muted mb-0">No transactions parsed.</p>';
+  }
+
+  return `
+    <div class="table-responsive">
+      <table class="table table-sm align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Merchant</th>
+            <th>Category</th>
+            <th class="text-end">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${transactions
+            .map(
+              (tx) => `
+            <tr>
+              <td>${tx.merchant || "—"}</td>
+              <td><span class="badge bg-light text-dark">${tx.category || "Unknown"}</span></td>
+              <td class="text-end fw-semibold">${formatCurrency(tx.amount || 0)}</td>
+            </tr>`
+            )
+            .join("")}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function renderBreakdown(breakdown) {
+  const entries = Object.entries(breakdown || {});
+  if (entries.length === 0) {
+    return '<p class="text-muted mb-0">No breakdown available.</p>';
+  }
+
+  const total = entries.reduce((sum, [, amt]) => sum + amt, 0);
+
+  return entries
+    .map(([category, amount]) => {
+      const pct = total ? Math.round((amount / total) * 100) : 0;
+      return `
+        <div class="breakdown-row">
+          <div class="d-flex justify-content-between mb-1">
+            <span>${category}</span>
+            <span class="fw-semibold">${formatCurrency(amount)}</span>
+          </div>
+          <div class="progress" style="height: 6px">
+            <div class="progress-bar" style="width: ${pct}%"></div>
+          </div>
+        </div>`;
+    })
+    .join("");
+}
+
+function renderAllocation(allocation) {
+  if (!allocation || Object.keys(allocation).length === 0) {
+    return '<p class="text-muted mb-0">No allocation data.</p>';
+  }
+
+  return Object.entries(allocation)
+    .map(
+      ([asset, value]) => `
+      <div class="d-flex justify-content-between py-2 border-bottom">
+        <span class="text-capitalize">${asset.replace(/_/g, " ")}</span>
+        <span class="fw-semibold">${typeof value === "number" ? formatCurrency(value) : value}</span>
+      </div>`
+    )
+    .join("");
+}
+
+function renderRagContext(context) {
+  if (!context || context.length === 0) {
+    return '<p class="text-muted mb-0">No knowledge retrieved.</p>';
+  }
+
+  return context
+    .map((item, i) => `<p class="mb-2"><strong>${i + 1}.</strong> ${item}</p>`)
+    .join("");
+}
+
+async function loadProfile() {
+  try {
+    const res = await fetch(`${API_BASE}/profile`);
+    if (!res.ok) return;
+
+    const profile = await res.json();
+    if (!profile) return;
+
+    document.getElementById("name").value = profile.name || "";
+    document.getElementById("age").value = profile.age || "";
+    document.getElementById("income").value = profile.monthly_income || "";
+    document.getElementById("risk").value = profile.risk_appetite || "Medium";
+    document.getElementById("goal").value = profile.goal || "";
+
+    const avatar = document.getElementById("profileAvatar");
+    if (avatar && profile.name) {
+      avatar.textContent = profile.name.charAt(0).toUpperCase();
+    }
+  } catch {
+    /* backend offline */
+  }
+}
+
+document.getElementById("profileForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const statusEl = document.getElementById("profileStatus");
+  const profile = {
+    name: document.getElementById("name").value,
+    age: parseInt(document.getElementById("age").value, 10),
+    monthly_income: parseFloat(document.getElementById("income").value),
+    risk_appetite: document.getElementById("risk").value,
+    goal: document.getElementById("goal").value,
+  };
+
+  try {
+    const res = await fetch(`${API_BASE}/profile`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(profile),
+    });
+
+    if (res.ok) {
+      showStatus(statusEl, "Profile saved successfully.", "success");
+      const avatar = document.getElementById("profileAvatar");
+      if (avatar && profile.name) {
+        avatar.textContent = profile.name.charAt(0).toUpperCase();
+      }
+    } else {
+      showStatus(statusEl, "Failed to save profile.", "danger");
+    }
+  } catch {
+    showStatus(statusEl, "Backend not running. Start the server with: uvicorn app.main:app --reload", "warning");
+  }
+});
+
+document.getElementById("analyzeBtn").addEventListener("click", async () => {
+  const text = document.getElementById("transactionText").value.trim();
+  if (!text) {
+    alert("Enter transaction text first.");
+    return;
+  }
+
+  const loading = document.getElementById("loadingSection");
+  const results = document.getElementById("analysisResults");
+  const btn = document.getElementById("analyzeBtn");
+
+  loading.style.display = "block";
+  results.style.display = "none";
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(`${API_BASE}/advisor`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Server returned ${res.status}`);
+    }
+
+    const data = await res.json();
+
+    document.getElementById("parsedOutput").innerHTML = renderTransactions(data.transactions);
+    document.getElementById("breakdownOutput").innerHTML = renderBreakdown(data.breakdown);
+    document.getElementById("allocationOutput").innerHTML = renderAllocation(data.allocation);
+    document.getElementById("ragOutput").innerHTML = renderRagContext(data.rag_context);
+    document.getElementById("adviceOutput").textContent =
+      data.final_advice || data.advice || "No advice generated.";
+
+    results.style.display = "block";
+  } catch (err) {
+    alert("Analysis failed. Make sure the backend is running and API keys are configured.");
+    console.error(err);
+  } finally {
+    loading.style.display = "none";
+    btn.disabled = false;
+  }
+});
+
+loadProfile();

@@ -9,15 +9,3 @@ class SpendState(TypedDict):
     rag_context: List[str]
     allocation: Dict[str, float]
     final_advice: str
-    
-class SpendState(TypedDict, total=False):
-    text: str
-    transactions: list
-    breakdown: dict
-
-    profile: dict
-    history: dict
-    rag_context: list
-
-    allocation: dict
-    final_advice: str

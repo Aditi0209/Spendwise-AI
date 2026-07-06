@@ -1,5 +1,10 @@
 def allocate(profile, spending):
 
+    if not profile or "monthly_income" not in profile:
+        return {
+            "note": "Save your profile first to get asset allocation recommendations"
+        }
+
     income = profile["monthly_income"]
     risk = profile["risk_appetite"].lower()
     goal = profile["goal"].lower()
