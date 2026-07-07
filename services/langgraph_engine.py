@@ -6,19 +6,15 @@ from agents.profile_agent import get_profile
 from agents.history_agent import get_history
 from services.rag import retrieve_context
 from agents.allocation_agent import run_allocation
-
+from services.llm import client
 from langfuse import get_client
-from groq import Groq
-import os
-from dotenv import load_dotenv
 import logging
-
-load_dotenv()
+import os
 
 logger = logging.getLogger("spendwise.langgraph")
 
 # Initialize clients only if API keys exist; otherwise leave None and handle later
-_GROQ_KEY = os.getenv("GROQ_API_KEY")
+
 _LANGFUSE_KEY = os.getenv("LANGFUSE_API_KEY")
 
 try:
@@ -26,12 +22,6 @@ try:
 except Exception as e:
     logger.warning(f"Langfuse client init failed: {e}")
     langfuse = None
-
-try:
-    client = Groq(api_key=_GROQ_KEY) if _GROQ_KEY else None
-except Exception as e:
-    logger.warning(f"Groq client init failed: {e}")
-    client = None
 
 # -------------------------
 # NODE 1: PARSE

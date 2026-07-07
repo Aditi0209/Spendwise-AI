@@ -1,10 +1,5 @@
-import json, os
-from dotenv import load_dotenv
-from groq import Groq
-
-load_dotenv()
-
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+import json
+from services.llm import client
 
 def parse_transactions(text:str):
     prompt = f"""

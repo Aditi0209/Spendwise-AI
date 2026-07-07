@@ -27,6 +27,10 @@ from services.history import get_spending_history
 
 from services.langgraph_engine import run_graph
 
+from app.db import db
+from services.langgraph_engine import app
+from services.llm import client
+
 router = APIRouter()
 
 def default_profile(name: str = "") -> dict:
@@ -217,9 +221,43 @@ def get_transactions(
 @router.get("/health")
 def health():
 
-    return {
-        "fastapi": "ok",
-        "mongodb": "ok",
-        "langgraph": "ok",
-        "llm": "ok",
-    }
+    health = {}
+
+    # FastAPI
+    health["fastapi"] = "ok"
+
+    # MongoDB
+    try:
+        db.command("ping")
+        health["mongodb"] = "ok"
+    except Exception as e:
+        health["mongodb"] = str(e)
+
+    # LangGraph
+    try:
+        if app:
+            health["langgraph"] = "ok"
+        else:
+            health["langgraph"] = "failed"
+    except Exception as e:
+        health["langgraph"] = str(e)
+
+    # Groq
+    try:
+        client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {
+                    "role": "user",
+                    "content": "hello"
+                }
+            ],
+            max_tokens=1
+        )
+
+        health["llm"] = "ok"
+
+    except Exception as e:
+        health["llm"] = str(e)
+
+    return health

@@ -31,10 +31,11 @@ const auth = {
 
     logout() {
 
-        this.removeToken();
+    localStorage.clear();
+    sessionStorage.clear();
 
-        window.location.href = "login.html";
-    }
+    window.location.replace("login.html");
+}
 };
 
 window.auth = auth;

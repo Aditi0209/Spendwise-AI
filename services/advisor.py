@@ -1,18 +1,13 @@
 from services.rag import retrieve_context
-from groq import Groq
-import os
-from dotenv import load_dotenv
+from services.llm import client
 from app.db import profiles
 from services.history import get_spending_history
 from services.allocation import allocate
 from services.utils import compute_total_spending
 import logging
 
-load_dotenv()
 
 logger = logging.getLogger("spendwise")
-
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 def generate_advice(transactions):
     

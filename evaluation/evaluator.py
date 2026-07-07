@@ -1,9 +1,5 @@
 from services.langgraph_engine import run_graph
-from groq import Groq
-import os
-
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-
+from services.llm import client
 
 TEST_CASES = [
     {
