@@ -28,6 +28,7 @@
   </head>
 
   <body>
+    
     <div class="d-flex">
       <!-- Sidebar -->
 
@@ -63,11 +64,11 @@
 
         <div class="sidebar-footer">
           <p>AI Financial Orchestration</p>
-          <!-- <p id="userLabel" class="user-email"></p>
-          <a href="#" id="logoutBtn" class="nav-link logout-link">
+          <p id="userLabel" class="user-email"></p>
+          <a href="#" id="logoutBtn" class="nav-link logout-link" onclick="auth.logout()">
             <i class="bi bi-box-arrow-right"></i>
             Sign Out
-          </a> -->
+          </a>
           <small>Version 1.0</small>
         </div>
       </aside>
@@ -90,16 +91,15 @@
         <!-- Hero -->
 
         <section class="hero">
-          <h1>AI Financial Orchestration Platform</h1>
+          <h1>Personal finance insights, made simple</h1>
 
           <p>
-            Analyze transactions, retrieve financial knowledge, generate
-            intelligent asset allocations and personalized financial advice
-            using LLMs, RAG and LangGraph.
+            Create your profile, analyze your transactions, and get tailored advice
+            for budgeting, savings, and smarter money decisions.
           </p>
 
           <a href="analysis.html" class="btn btn-primary btn-lg">
-            Start Analysis
+            Start with your profile
           </a>
         </section>
 
@@ -176,36 +176,36 @@
         <!-- Technology Stack -->
 
         <section class="mt-5">
-          <h3 class="section-title">Technology Stack</h3>
+          <h3 class="section-title">How it works</h3>
 
           <div class="row g-4 mt-2">
             <div class="col-md-4">
               <div class="tech-card">
-                <i class="bi bi-cpu"></i>
+                <i class="bi bi-person-fill"></i>
 
-                <h5>Groq LLM</h5>
+                <h5>1. Save your profile</h5>
 
-                <p>Transaction parsing and financial advice generation.</p>
+                <p>Tell us your income, goals, and risk appetite.</p>
               </div>
             </div>
 
             <div class="col-md-4">
               <div class="tech-card">
-                <i class="bi bi-diagram-3"></i>
+                <i class="bi bi-file-earmark-text-fill"></i>
 
-                <h5>LangGraph</h5>
+                <h5>2. Analyze transactions</h5>
 
-                <p>Multi-agent orchestration engine.</p>
+                <p>Paste your bank or expense details to get structured insights.</p>
               </div>
             </div>
 
             <div class="col-md-4">
               <div class="tech-card">
-                <i class="bi bi-database-fill"></i>
+                <i class="bi bi-stars"></i>
 
-                <h5>MongoDB</h5>
+                <h5>3. Get personalized advice</h5>
 
-                <p>User profiles and transaction history.</p>
+                <p>Receive clear recommendations based on your own data.</p>
               </div>
             </div>
           </div>
@@ -298,10 +298,7 @@ AI ORCHESTRATION PIPELINE
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- <script src="js/auth.js"></script>
-    <script>
-      if (requireAuth()) initUserNav();
-    </script> -->
+    
     <script src="js/dashboard.js"></script>
   </body>
 </html>

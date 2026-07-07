@@ -9,8 +9,7 @@ client = MongoClient(os.getenv("MONGO_URI"))
 db = client["spendwise"]
 
 # Collections
-# users = db["users"]
-# sessions = db["sessions"]
+users = db["users"]
 profiles = db["profiles"]
 transactions = db["transactions"]
 insights = db["insights"]

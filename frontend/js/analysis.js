@@ -1,4 +1,4 @@
-const API_BASE = window.location.origin || "http://127.0.0.1:8000";
+const API_BASE = "http://127.0.0.1:8000";
 
 function formatCurrency(amount) {
   return `₹${Number(amount).toLocaleString("en-IN")}`;
@@ -7,6 +7,10 @@ function formatCurrency(amount) {
 function showStatus(el, message, type) {
   el.className = `mt-3 alert alert-${type}`;
   el.textContent = message;
+}
+
+function formatAmount(value) {
+  return `₹${Number(value || 0).toLocaleString("en-IN")}`;
 }
 
 function renderTransactions(transactions) {
@@ -92,12 +96,20 @@ function renderRagContext(context) {
 }
 
 async function loadProfile() {
+  const statusEl = document.getElementById("profileStatus");
+
   try {
-    const res = await fetch(`${API_BASE}/profile`);
-    if (!res.ok) return;
+    const res = await fetch(`${API_BASE}/profile`, { headers: auth.authHeaders() });
+    if (!res.ok) {
+      showStatus(statusEl, "Unable to load your profile right now. Please sign in again.", "warning");
+      return;
+    }
 
     const profile = await res.json();
-    if (!profile) return;
+    if (!profile || Object.keys(profile).length === 0) {
+      showStatus(statusEl, "No profile found yet. Save your details to personalize your advice.", "info");
+      return;
+    }
 
     document.getElementById("name").value = profile.name || "";
     document.getElementById("age").value = profile.age || "";
@@ -105,12 +117,25 @@ async function loadProfile() {
     document.getElementById("risk").value = profile.risk_appetite || "Medium";
     document.getElementById("goal").value = profile.goal || "";
 
+    const monthlySpend = Number(profile.monthly_spend || 0);
+    const monthlyIncome = Number(profile.monthly_income || 0);
+    const monthlySavings = Math.max(0, monthlyIncome - monthlySpend);
+
+    document.getElementById("monthlySpend").value = formatAmount(monthlySpend);
+    document.getElementById("monthlySavings").value = formatAmount(monthlySavings);
+    document.getElementById("savingStatus").textContent =
+      monthlySavings >= 0
+        ? `Estimated monthly savings: ${formatAmount(monthlySavings)}`
+        : "Your spending appears higher than your income.";
+
     const avatar = document.getElementById("profileAvatar");
     if (avatar && profile.name) {
       avatar.textContent = profile.name.charAt(0).toUpperCase();
     }
+
+    showStatus(statusEl, "Your saved profile has been loaded.", "success");
   } catch {
-    /* backend offline */
+    showStatus(statusEl, "Backend not running. Start the server with: uvicorn app.main:app --reload", "warning");
   }
 }
 
@@ -121,7 +146,8 @@ document.getElementById("profileForm").addEventListener("submit", async (e) => {
   const profile = {
     name: document.getElementById("name").value,
     age: parseInt(document.getElementById("age").value, 10),
-    monthly_income: parseFloat(document.getElementById("income").value),
+    monthly_income: parseFloat(document.getElementById("income").value) || 0,
+    monthly_spend: parseFloat(document.getElementById("monthlySpend").value.replace(/[₹,]/g, "")) || 0,
     risk_appetite: document.getElementById("risk").value,
     goal: document.getElementById("goal").value,
   };
@@ -129,16 +155,26 @@ document.getElementById("profileForm").addEventListener("submit", async (e) => {
   try {
     const res = await fetch(`${API_BASE}/profile`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: auth.authHeaders(),
       body: JSON.stringify(profile),
     });
 
     if (res.ok) {
-      showStatus(statusEl, "Profile saved successfully.", "success");
+      showStatus(statusEl, "Profile saved successfully. You can now analyze your transactions.", "success");
       const avatar = document.getElementById("profileAvatar");
       if (avatar && profile.name) {
         avatar.textContent = profile.name.charAt(0).toUpperCase();
       }
+
+      const monthlyIncome = Number(profile.monthly_income || 0);
+      const monthlySpend = Number(profile.monthly_spend || 0);
+      const monthlySavings = Math.max(0, monthlyIncome - monthlySpend);
+      document.getElementById("monthlySpend").value = formatAmount(monthlySpend);
+      document.getElementById("monthlySavings").value = formatAmount(monthlySavings);
+      document.getElementById("savingStatus").textContent =
+        monthlySavings >= 0
+          ? `Estimated monthly savings: ${formatAmount(monthlySavings)}`
+          : "Your spending appears higher than your income.";
     } else {
       showStatus(statusEl, "Failed to save profile.", "danger");
     }
@@ -165,7 +201,7 @@ document.getElementById("analyzeBtn").addEventListener("click", async () => {
   try {
     const res = await fetch(`${API_BASE}/advisor`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: auth.authHeaders(),
       body: JSON.stringify({ text }),
     });
 

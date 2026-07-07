@@ -1,4 +1,4 @@
-const API_BASE = window.location.origin || "http://127.0.0.1:8000";
+const API_BASE = "http://127.0.0.1:8000";
 
 const CHART_COLORS = [
   "#4F46E5",
@@ -91,8 +91,8 @@ async function loadHistory() {
 
   try {
     const [txRes, summaryRes] = await Promise.all([
-      fetch(`${API_BASE}/transactions`),
-      fetch(`${API_BASE}/history-summary`),
+      fetch(`${API_BASE}/transactions`, { headers: auth.authHeaders() }),
+      fetch(`${API_BASE}/history-summary`, { headers: auth.authHeaders() }),
     ]);
 
     const transactions = txRes.ok ? await txRes.json() : [];

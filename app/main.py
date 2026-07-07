@@ -1,35 +1,20 @@
 from contextlib import asynccontextmanager
-from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 
 from app.routes import router
 from services.rag import load_knowledge
 
-FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
-    Runs once when the application starts and shuts down.
-    Initialize shared resources here.
+    Runs once when the application starts.
+    Loads the RAG knowledge base.
     """
-
-    # Initialize RAG knowledge base
     load_knowledge()
-
-    # Future startup tasks:
-    # connect_mongodb()
-    # initialize_langfuse()
-    # initialize_vector_store()
-
     yield
-
-    # Future cleanup tasks:
-    # close_mongodb()
-    # shutdown_vector_store()
 
 
 app = FastAPI(
@@ -38,6 +23,7 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -52,16 +38,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Register all API routes
 app.include_router(router)
 
-if FRONTEND_DIR.is_dir():
-    app.mount("/", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="frontend")
-else:
 
-    @app.get("/", tags=["Health"])
-    async def health_check():
-        return {
-            "status": "running",
-            "service": "SpendWise AI",
-            "version": "1.0.0",
-        }
+@app.get("/")
+def root():
+    return {
+        "message": "Backend running"
+    }

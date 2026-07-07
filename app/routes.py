@@ -1,24 +1,33 @@
-from fastapi import APIRouter
-from app.models import ParseRequest
-from services.parser import parse_transactions
-from services.advisor import generate_advice
-from app.models import UserProfile
-from app.db import profiles
+from fastapi import APIRouter, HTTPException, status, Depends
+from app.dependencies import get_current_user
 
-# from app.auth import (
-#     create_session,
-#     get_current_user,
-#     hash_password,
-#     verify_password,
-# )
-# from app.db import profiles, sessions, transactions, users
-# from app.models import LoginRequest, ParseRequest, SignupRequest, UserProfile
-from app.db import transactions
+from app.models import (
+    ParseRequest,
+    UserProfile,
+    RegisterRequest,
+    LoginRequest,
+    TokenResponse,
+)
+
+from app.db import (
+    users,
+    profiles,
+    transactions,
+)
+
+from app.auth import (
+    hash_password,
+    verify_password,
+    create_access_token
+)
+
+from services.parser import parse_transactions
+
 from services.history import get_spending_history
+
 from services.langgraph_engine import run_graph
 
 router = APIRouter()
-
 
 def default_profile(name: str = "") -> dict:
     return {
@@ -30,116 +39,184 @@ def default_profile(name: str = "") -> dict:
         "goal": "",
     }
 
+# REGISTER
 
-# @router.post("/auth/signup")
-# def signup(request: SignupRequest):
-#     email = request.email.strip().lower()
+@router.post("/register")
+def register(request: RegisterRequest):
 
-#     if not email or not request.password:
-#         raise HTTPException(status_code=400, detail="Email and password are required")
+    existing_user = users.find_one(
+        {
+            "email": request.email
+        }
+    )
 
-#     if users.find_one({"email": email}):
-#         raise HTTPException(status_code=400, detail="Email already registered")
+    if existing_user:
 
-#     users.insert_one(
-#         {
-#             "email": email,
-#             "name": request.name.strip(),
-#             "password_hash": hash_password(request.password),
-#         }
-#     )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already registered"
+        )
 
-#     profiles.insert_one({"user_id": email, **default_profile(request.name.strip())})
+    user = {
 
-#     token = create_session(email)
+        "username": request.username,
 
-#     return {
-#         "token": token,
-#         "user": {"email": email, "name": request.name.strip()},
-#     }
+        "email": request.email,
 
+        "password": hash_password(request.password)
 
-# @router.post("/auth/login")
-# def login(request: LoginRequest):
-#     email = request.email.strip().lower()
-#     user = users.find_one({"email": email})
+    }
 
-#     if not user or not verify_password(request.password, user["password_hash"]):
-#         raise HTTPException(status_code=401, detail="Invalid email or password")
+    users.insert_one(user)
 
-#     token = create_session(email)
+    return {
+        "message": "User registered successfully"
+    }
 
-#     return {
-#         "token": token,
-#         "user": {"email": email, "name": user.get("name", "")},
-#     }
+# LOGIN 
+@router.post("/login",response_model=TokenResponse)
+def login(request: LoginRequest):
 
+    user = users.find_one(
+        {
+            "email": request.email
+        }
+    )
 
-# @router.get("/auth/me")
-# def me(user: dict = Depends(get_current_user)):
-#     return user
+    if user is None:
 
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password"
+        )
 
-# @router.post("/auth/logout")
-# def logout(authorization: str = Header(default=None)):
-#     if authorization and authorization.startswith("Bearer "):
-#         sessions.delete_one({"token": authorization[7:]})
+    if not verify_password(
+        request.password,
+        user["password"]
+    ):
 
-#     return {"message": "Logged out"}
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password"
+        )
 
+    token = create_access_token(
+        {
+            "user_id": str(user["_id"]),
+            "email": user["email"]
+        }
+    )
+
+    return TokenResponse(
+        access_token=token
+    )
+    
+# PARSE
 
 @router.post("/parse")
-def parse(request: ParseRequest):
+def parse(request: ParseRequest,current_user=Depends(get_current_user)):
     parsed_transactions = parse_transactions(request.text)
-    
     for tx in parsed_transactions:
-        transactions.insert_one(tx.copy())
+        tx["user_id"] = str(current_user["_id"])
+        transactions.insert_one(tx)
 
-    return {"transactions": parsed_transactions}
+    return {
+        "transactions": parsed_transactions
+    }
 
 
+# ADVISOR
 @router.post("/advisor")
-async def advisor(request: ParseRequest):
-    # user_id = user["email"]
-    result = run_graph(request.text)
+async def advisor(request: ParseRequest,current_user=Depends(get_current_user)):
 
+    result = run_graph(request.text,str(current_user["_id"]))
     for tx in result.get("transactions", []):
-        transactions.insert_one(tx.copy())
+        tx_data = dict(tx)
+        tx_data["user_id"] = str(current_user["_id"])
+        transactions.insert_one(tx_data)
+
     return result
 
+# PROFILE
 
 @router.post("/profile")
-def create_profile(profile: UserProfile):
-    try:
-        profiles.replace_one({}, profile.model_dump(), upsert=True)
-        return {"message": "Profile saved"}
-    except Exception as e:
-        # Log and return error response
-        return {"error": f"Could not save profile: {e}"}
+def create_profile(
+    profile: UserProfile,
+    current_user=Depends(get_current_user)
+):
 
+    profile_data = profile.model_dump()
+
+    profile_data["user_id"] = str(current_user["_id"])
+
+    profiles.update_one(
+        {
+            "user_id": str(current_user["_id"])
+        },
+        {
+            "$set": profile_data
+        },
+        upsert=True
+    )
+
+    return {
+        "message": "Profile saved successfully"
+    }
 
 @router.get("/profile")
-def get_profile():
-    # user_id = user["email"]
-    try:
-        profile = profiles.find_one({}, {"_id": 0})
-        return profile or {}
-    except Exception as e:
-        return {"error": f"Could not retrieve profile: {e}"}
+def get_profile(
+    current_user=Depends(get_current_user)
+):
 
+    profile = profiles.find_one(
+        {
+            "user_id": str(current_user["_id"])
+        },
+        {
+            "_id": 0
+        }
+    )
+
+    return profile or {}
+
+# HISTORY
 
 @router.get("/history-summary")
-def history_summary():
-    return get_spending_history()
+def history_summary(
+    current_user=Depends(get_current_user)
+):
 
+    return get_spending_history(
+        str(current_user["_id"])
+    )
+    
+# TRANSACTIONS
 
 @router.get("/transactions")
-def get_transactions():
-    return list(transactions.find({}, {"_id": 0}))
+def get_transactions(
+    current_user=Depends(get_current_user)
+):
 
+    return list(
+
+        transactions.find(
+
+            {
+                "user_id": str(current_user["_id"])
+            },
+
+            {
+                "_id": 0
+            }
+
+        )
+
+    )
+# HEALTH
 
 @router.get("/health")
 def health():
+
     return {
         "fastapi": "ok",
         "mongodb": "ok",

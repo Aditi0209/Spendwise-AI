@@ -67,19 +67,31 @@ def breakdown_node(state):
 # NODE 3: PROFILE
 # -------------------------
 def profile_node(state):
-    return {
-        "profile": get_profile() or {}
-    }
 
+    return {
+
+        "profile": get_profile(
+
+            state["user_id"]
+
+        )
+
+    }
 
 # -------------------------
 # NODE 4: HISTORY
 # -------------------------
 def history_node(state):
-    return {
-        "history": get_history() or {}
-    }
 
+    return {
+
+        "history": get_history(
+
+            state["user_id"]
+
+        )
+
+    }
 
 # -------------------------
 # NODE 5: RAG
@@ -236,9 +248,21 @@ app = graph.compile()
 # -------------------------
 # RUN FUNCTION (FIXED)
 # -------------------------
-def run_graph(text: str):
+def run_graph(
+    text: str,
+    user_id: str
+):
 
-    result = app.invoke({
-        "text": text,
-    })
+    result = app.invoke(
+
+        {
+
+            "text": text,
+
+            "user_id": user_id
+
+        }
+
+    )
+
     return result
