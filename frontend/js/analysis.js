@@ -261,8 +261,10 @@ document.getElementById("analyzeBtn").addEventListener("click", async () => {
     document.getElementById("ragOutput").innerHTML = renderRagContext(
       data.rag_context,
     );
-    document.getElementById("adviceOutput").textContent =
-      data.final_advice || data.advice || "No advice generated.";
+    const advice = data.final_advice || data.advice || "No advice generated.";
+
+document.getElementById("adviceOutput").innerHTML =
+    marked.parse(advice);
 
     results.style.display = "block";
   } catch (err) {

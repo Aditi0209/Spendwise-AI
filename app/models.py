@@ -25,3 +25,7 @@ class UserProfile(BaseModel):
     monthly_spend: float = 0
     risk_appetite: str
     goal: str
+    
+class ResetPasswordRequest(BaseModel):
+    email: str
+    new_password: str

@@ -1,5 +1,6 @@
 const API_BASE = window.API_BASE;
 
+console.log("API_BASE =", API_BASE);
 const form = document.getElementById("loginForm");
 const message = document.getElementById("message");
 
