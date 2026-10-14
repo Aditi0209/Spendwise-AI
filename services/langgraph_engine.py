@@ -15,7 +15,7 @@ logger = logging.getLogger("spendwise.langgraph")
 
 # Initialize clients only if API keys exist; otherwise leave None and handle later
 
-_LANGFUSE_KEY = os.getenv("LANGFUSE_API_KEY")
+_LANGFUSE_KEY = os.getenv("LANGFUSE_PUBLIC_KEY")
 
 try:
     langfuse = get_client() if _LANGFUSE_KEY else None

@@ -30,7 +30,7 @@ def load_knowledge(force_reload=False):
 
     global _last_loaded_time
 
-    # 🚀 Skip if already initialized in ChromaDB
+    # Skip if already initialized in ChromaDB
     if not force_reload and is_initialized():
         print("[RAG] Already loaded in ChromaDB. Skipping reload.")
         return
