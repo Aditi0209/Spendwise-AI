@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from app.dependencies import get_current_user
+from services.history import save_analysis
 
 from app.models import (
     ParseRequest,
@@ -94,7 +95,7 @@ def login(request: LoginRequest):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password"
         )
-
+    
     if not verify_password(
         request.password,
         user["password"]
@@ -139,6 +140,13 @@ async def advisor(request: ParseRequest,current_user=Depends(get_current_user)):
         tx_data = dict(tx)
         tx_data["user_id"] = str(current_user["_id"])
         transactions.insert_one(tx_data)
+        
+    save_analysis(
+    user_id=str(current_user["_id"]),
+    breakdown=result.get("breakdown", {}),
+    allocation=result.get("allocation", {}),
+    advice=result.get("final_advice", "")
+    )
 
     return result
 
