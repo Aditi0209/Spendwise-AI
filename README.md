@@ -71,11 +71,3 @@ data/       financial_tips.txt (RAG knowledge base)
 
 - **Asset allocation is rule-based, not LLM-generated:** financial numbers should be deterministic and explainable. The LLM only explains and advises on top of them.
 - **Deterministic graph instead of autonomous agents:** each step is fixed, which makes the workflow predictable, cheaper and easier to debug.
-
-## Known Limitations and Future Work
-
-- RAG retrieval quality has not been formally evaluated (planned: recall@k and RAGAS).
-- Only the advisor LLM call is traced in Langfuse; the parse step is not yet instrumented.
-- LLM output from the parser is not yet validated against a schema or retried on invalid JSON.
-- Submitting the same text twice creates duplicate transactions (idempotency is a planned improvement).
-- Blocking LLM and database calls inside `async` routes should be moved to async clients.
