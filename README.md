@@ -67,22 +67,6 @@ data/       financial_tips.txt (RAG knowledge base)
    ```
 4. Open the interactive API docs at `http://127.0.0.1:8000/docs`.
 
-## API Endpoints
-
-| Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| POST | `/register` | No | Create an account |
-| POST | `/login` | No | Returns a JWT access token |
-| POST | `/profile` | Yes | Create or update the user's financial profile |
-| GET | `/profile` | Yes | Get the user's profile |
-| POST | `/parse` | Yes | Parse transaction text and store transactions |
-| POST | `/advisor` | Yes | Run the full workflow and return breakdown, allocation and advice |
-| GET | `/transactions` | Yes | List the user's transactions |
-| GET | `/history-summary` | Yes | Category-wise spending history |
-| GET | `/health` | No | Checks FastAPI, MongoDB, LangGraph and the LLM |
-
-Protected endpoints require the header `Authorization: Bearer <token>`.
-
 ## Design Decisions
 
 - **Asset allocation is rule-based, not LLM-generated:** financial numbers should be deterministic and explainable. The LLM only explains and advises on top of them.
